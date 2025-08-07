@@ -1,4 +1,4 @@
-package gopyte_test
+github.com/scottpeterman/gopyte
 
 import (
 	"github.com/scottpeterman/gopyte"

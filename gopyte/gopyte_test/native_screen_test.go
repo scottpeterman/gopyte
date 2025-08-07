@@ -1,7 +1,7 @@
 package gopyte_test
 
 import (
-	"github.com/scottpeterman/gopyte"
+	gopyte "github.com/scottpeterman/gopyte/gopyte"
 	"strings"
 	"testing"
 )

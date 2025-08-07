@@ -2,7 +2,7 @@ package gopyte_test
 
 import (
 	"fmt"
-	"github.com/scottpeterman/gopyte"
+	gopyte "github.com/scottpeterman/gopyte/gopyte"
 	"os"
 	"path/filepath"
 	"strings"

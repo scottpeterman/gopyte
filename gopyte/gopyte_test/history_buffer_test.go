@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/scottpeterman/gopyte"
+	gopyte "github.com/scottpeterman/gopyte/gopyte"
 )
 
 // TestHistoryBufferDebug tests the history buffer behavior with correct expectations

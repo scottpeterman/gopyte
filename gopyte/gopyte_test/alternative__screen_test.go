@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/scottpeterman/gopyte"
+	gopyte "github.com/scottpeterman/gopyte/gopyte"
 )
 
 func TestAlternateScreenBuffer(t *testing.T) {

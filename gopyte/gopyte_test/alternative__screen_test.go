@@ -2,9 +2,10 @@ package gopyte_test
 
 import (
 	"fmt"
-	"github.com/scottpeterman/gopyte"
 	"strings"
 	"testing"
+
+	"github.com/scottpeterman/gopyte"
 )
 
 func TestAlternateScreenBuffer(t *testing.T) {

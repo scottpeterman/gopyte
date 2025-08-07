@@ -1,0 +1,4 @@
+go test ./gopyte_test -v -run "TestAlternate|TestWide|TestEmoji"
+go test ./gopyte_test -v -run TestNativeScreen
+go test ./gopyte_test -v -run TestHistoryScreen
+go test ./gopyte_test -v -run TestNativeScreenWithFixtures

@@ -1,8 +1,8 @@
 package gopyte
 
-// Screen represents a terminal screen
+// Screen represents a terminal screen that can handle ANSI escape sequences
 type Screen interface {
-	// Basic operations
+	// Basic drawing
 	Draw(text string)
 	Bell()
 	Backspace()
@@ -41,20 +41,20 @@ type Screen interface {
 	EraseInLine(how int, private bool)
 	EraseInDisplay(how int)
 
-	// Modes
+	// Mode setting
 	SetMode(modes []int, private bool)
 	ResetMode(modes []int, private bool)
 
-	// Attributes
-	SelectGraphicRendition(attrs []int)
-
-	// Charset
+	// Character sets
 	DefineCharset(code, mode string)
 
-	// Margins
+	// Scrolling regions
 	SetMargins(top, bottom int)
 
-	// Reports
+	// Graphics
+	SelectGraphicRendition(params []int)
+
+	// Reporting
 	ReportDeviceAttributes(mode int, private bool)
 	ReportDeviceStatus(mode int)
 
@@ -62,12 +62,12 @@ type Screen interface {
 	SetTitle(title string)
 	SetIconName(name string)
 
-	// Alignment
+	// Misc
 	AlignmentDisplay()
-
-	// Debug
 	Debug(args ...interface{})
-
-	// Process communication
 	WriteProcessInput(data string)
 }
+
+// Note: GetDisplay() and GetCursor() are available on NativeScreen
+// and HistoryScreen as concrete methods, not part of the interface.
+// This maintains backward compatibility with MockScreen and PythonScreen.

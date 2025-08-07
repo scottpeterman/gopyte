@@ -1,7 +1,7 @@
 package gopyte_test
 
 import (
-	"github.com/pyte/gopyte/gopyte"
+	"github.com/scottpeterman/gopyte"
 	// "github.com/stretchr/testify/assert"
 	"os"
 	"testing"

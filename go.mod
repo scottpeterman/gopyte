@@ -1,4 +1,4 @@
-module github.com/pyte/gopyte
+module github.com/scottpeterman/gopyte
 
 go 1.24
 

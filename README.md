@@ -26,7 +26,7 @@ package main
 
 import (
     "fmt"
-    "github.com/pyte/gopyte/gopyte"
+    "github.com/scottpeterman/gopyte"
 )
 
 func main() {

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/pyte/gopyte/gopyte"
+	"github.com/scottpeterman/gopyte"
 )
 
 // TestGopyteProductionReadiness demonstrates that WideCharScreen is production-ready

@@ -2,31 +2,31 @@
 
 A pure Go implementation of a VT100/VT220/ANSI terminal emulator, originally inspired by the Python [pyte](https://github.com/selectel/pyte) library. GoPyte provides complete terminal emulation with Unicode support, scrollback history, and alternate screen buffers.
 
-## ✨ Features
+## Features
 
-- ✅ **Pure Go** - No CGO, no Python, no external dependencies (except go-runewidth for Unicode)
-- ✅ **VT100/VT220 Compatible** - Handles real terminal applications
-- ✅ **Unicode Support** - Full wide character, CJK, and emoji support
-- ✅ **Alternate Screen** - Complete vim/less/htop support
-- ✅ **Scrollback History** - Configurable history buffer with pagination
-- ✅ **Fast** - ~26 MB/s processing speed, handles 1000+ screens/second
-- ✅ **Production Ready** - 100% test coverage on core features
-- ✅ **Well Tested** - Validated against real terminal output captures
+- **Pure Go** - No CGO, no Python, no external dependencies (except go-runewidth for Unicode)
+- **VT100/VT220 Compatible** - Handles real terminal applications
+- **Unicode Support** - Full wide character, CJK, and emoji support
+- **Alternate Screen** - Complete vim/less/htop support
+- **Scrollback History** - Configurable history buffer with pagination
+- **Fast** - ~26 MB/s processing speed, handles 1000+ screens/second
+- **Production Ready** - 100% test coverage on core features
+- **Well Tested** - Validated against real terminal output captures
 
-## 🚀 Installation
+## Installation
 
 ```bash
-go get github.com/pyte/gopyte
+go get github.com/scottpeterman/gopyte/gopyte
 ```
 
-## 📋 Quick Start
+## Quick Start
 
 ```go
 package main
 
 import (
     "fmt"
-    "github.com/scottpeterman/gopyte"
+    "github.com/scottpeterman/gopyte/gopyte"
 )
 
 func main() {
@@ -38,7 +38,7 @@ func main() {
     stream.Feed("\x1b[2J")           // Clear screen
     stream.Feed("\x1b[H")            // Move cursor home
     stream.Feed("\x1b[31mHello, \x1b[32m世界!\x1b[0m\r\n")
-    stream.Feed("Terminal emulation in Go! 🚀")
+    stream.Feed("Terminal emulation in Go!")
     
     // Get the display
     display := screen.GetDisplay()
@@ -53,7 +53,7 @@ func main() {
 }
 ```
 
-## 🏗️ Architecture
+## Architecture
 
 GoPyte provides three screen implementations with increasing functionality:
 
@@ -97,43 +97,43 @@ WideCharScreen (wide_char_screen.go) ← **Use this for production!**
 4. **Graphics** (`graphics.go`) - SGR attributes and colors
 5. **Modes** (`modes.go`) - Terminal mode constants
 
-## ✅ Implementation Status
+## Implementation Status
 
 ### Fully Implemented (Production Ready)
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| **Basic Operations** | ✅ | Draw, Bell, Backspace, Tab, Linefeed, CR |
-| **Cursor Movement** | ✅ | All directions, positioning, save/restore |
-| **Screen Manipulation** | ✅ | Clear, erase (display/line), reset |
-| **Line Operations** | ✅ | Insert/delete lines and characters |
-| **Text Attributes** | ✅ | Bold, italic, underline, reverse, strikethrough, blink |
-| **Colors** | ✅ | ANSI 8, AIXterm 16, 256-color palette |
-| **Unicode/Wide Chars** | ✅ | CJK, emoji, combining characters |
-| **Alternate Screen** | ✅ | Full vim/less/htop support |
-| **Scrollback History** | ✅ | Configurable buffer with navigation |
-| **Tab Stops** | ✅ | Set, clear, default positions |
-| **Scrolling Regions** | ✅ | Margins, index/reverse index |
-| **Window Operations** | ✅ | Title, icon name (OSC 0/1/2) |
-| **Bracketed Paste** | ✅ | Mode detection and handling |
+| **Basic Operations** | DONE | Draw, Bell, Backspace, Tab, Linefeed, CR |
+| **Cursor Movement** | DONE | All directions, positioning, save/restore |
+| **Screen Manipulation** | DONE | Clear, erase (display/line), reset |
+| **Line Operations** | DONE | Insert/delete lines and characters |
+| **Text Attributes** | DONE | Bold, italic, underline, reverse, strikethrough, blink |
+| **Colors** | DONE | ANSI 8, AIXterm 16, 256-color palette |
+| **Unicode/Wide Chars** | DONE | CJK, emoji, combining characters |
+| **Alternate Screen** | DONE | Full vim/less/htop support |
+| **Scrollback History** | DONE | Configurable buffer with navigation |
+| **Tab Stops** | DONE | Set, clear, default positions |
+| **Scrolling Regions** | DONE | Margins, index/reverse index |
+| **Window Operations** | DONE | Title, icon name (OSC 0/1/2) |
+| **Bracketed Paste** | DONE | Mode detection and handling |
 
 ### Partially Implemented
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| **Character Sets** | ⚠️ | G0/G1 switching works, SO/SI needs implementation |
-| **True Color** | ⚠️ | Parses RGB sequences but stores as 256-color |
-| **Cursor Shapes** | ⚠️ | Parses but doesn't track shape state |
+| **Character Sets** | PARTIAL | G0/G1 switching works, SO/SI needs implementation |
+| **True Color** | PARTIAL | Parses RGB sequences but stores as 256-color |
+| **Cursor Shapes** | PARTIAL | Parses but doesn't track shape state |
 
 ### Not Implemented
 
 | Feature | Status | Notes |
 |---------|--------|-------|
-| **Mouse Support** | ❌ | X10, X11, SGR mouse protocols |
-| **Advanced Modes** | ❌ | DECOM, DECCOLM (80/132 col) |
-| **Device Reports** | ❌ | DA, DSR responses |
+| **Mouse Support** | TODO | X10, X11, SGR mouse protocols |
+| **Advanced Modes** | TODO | DECOM, DECCOLM (80/132 col) |
+| **Device Reports** | TODO | DA, DSR responses |
 
-## 📊 Performance
+## Performance
 
 Benchmark results on Intel i7-10850H @ 2.70GHz:
 
@@ -146,41 +146,41 @@ Benchmark results on Intel i7-10850H @ 2.70GHz:
 
 Processing speed: **~26 MB/second** for complex terminal output
 
-## 🧪 Testing
+## Testing
 
 ```bash
 # Run all tests
-go test ./gopyte_test -v
+go test ./gopyte/gopyte_test -v
 
 # Production readiness test (100% pass rate)
-go test ./gopyte_test -v -run TestGopyteProductionReadiness
+go test ./gopyte/gopyte_test -v -run TestGopyteProductionReadiness
 
 # Test with real terminal captures
-go test ./gopyte_test -v -run TestNativeScreenWithFixtures
+go test ./gopyte/gopyte_test -v -run TestNativeScreenWithFixtures
 
 # History and scrollback tests
-go test ./gopyte_test -v -run TestHistoryScreen
+go test ./gopyte/gopyte_test -v -run TestHistoryScreen
 
 # Unicode and wide character tests
-go test ./gopyte_test -v -run "TestWide|TestEmoji"
+go test ./gopyte/gopyte_test -v -run "TestWide|TestEmoji"
 
 # Benchmarks
-go test ./gopyte_test -bench=. -benchmem
+go test ./gopyte/gopyte_test -bench=. -benchmem
 ```
 
 ### Test Coverage
 
 Successfully tested with real terminal output from:
-- ✅ `ls` - File listings with colors
-- ✅ `cat` - Large text files (35KB GPL text)
-- ✅ `top` - System monitor with real-time updates
-- ✅ `htop` - Complex TUI with colors and bars
-- ✅ `vim` - Text editor with alternate screen
-- ✅ `mc` - Midnight Commander file manager
-- ✅ `less` - Pager with scrollback
-- ✅ Modern CLI tools with Unicode and emoji
+- `ls` - File listings with colors
+- `cat` - Large text files (35KB GPL text)
+- `top` - System monitor with real-time updates
+- `htop` - Complex TUI with colors and bars
+- `vim` - Text editor with alternate screen
+- `mc` - Midnight Commander file manager
+- `less` - Pager with scrollback
+- Modern CLI tools with Unicode and emoji
 
-## 💻 Usage Examples
+## Usage Examples
 
 ### Basic Terminal Emulation
 
@@ -190,7 +190,7 @@ screen := gopyte.NewWideCharScreen(80, 24, 1000)
 stream := gopyte.NewStream(screen, false)
 
 // Feed terminal output
-stream.Feed("Hello, 世界! 🌍\r\n")
+stream.Feed("Hello, 世界!\r\n")
 stream.Feed("\x1b[31mRed text\x1b[0m\r\n")
 
 // Get display
@@ -271,36 +271,36 @@ stream.Feed("\x1b[?1049l")  // Exit alternate screen
 // Main screen content is restored
 ```
 
-## 🤝 Contributing
+## Contributing
 
 While GoPyte is production-ready for most use cases, contributions are welcome for:
 
-- [ ] True 24-bit RGB color support
-- [ ] SO/SI charset switching completion
-- [ ] Mouse protocol support
-- [ ] Device status reports (DA, DSR)
-- [ ] Performance optimizations
-- [ ] Additional test coverage
+- True 24-bit RGB color support
+- SO/SI charset switching completion
+- Mouse protocol support
+- Device status reports (DA, DSR)
+- Performance optimizations
+- Additional test coverage
 
-## 📄 License
+## License
 
 LGPL (same as original pyte)
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Original [pyte](https://github.com/selectel/pyte) library by Selectel
 - [go-runewidth](https://github.com/mattn/go-runewidth) for Unicode width calculations
 - Test fixtures from pyte project
 - VT100.net and XTerm documentation
 
-## 📈 Production Status
+## Production Status
 
-**✅ PRODUCTION READY** - WideCharScreen passes 100% of functional tests:
+**PRODUCTION READY** - WideCharScreen passes 100% of functional tests:
 
 - **16/16** core features working
 - **87.5%** Python pyte compatibility
 - Successfully handles: vim, htop, less, tmux, git, npm, and more
-- Full Unicode support including emoji 🎉
+- Full Unicode support including emoji
 - Scrollback history with navigation
 - Alternate screen buffer support
 

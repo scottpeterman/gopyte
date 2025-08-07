@@ -1,4 +1,4 @@
-github.com/scottpeterman/gopyte
+package gopyte_test
 
 import (
 	"fmt"

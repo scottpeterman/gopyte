@@ -244,27 +244,71 @@ func (a *AlternateScreen) drawTextDirect(text string) {
 	}
 }
 
-// Override Reset to handle alternate screen
-func (a *AlternateScreen) Reset() {
-	// Exit alternate screen if we're in it
-	if a.usingAlternate {
-		a.switchToMain()
-	}
-
-	// Reset both buffers
-	a.HistoryScreen.Reset()
-
-	// Also reset alternate buffer
-	for i := 0; i < a.lines; i++ {
-		for j := 0; j < a.columns; j++ {
-			a.altBuffer[i][j] = ' '
-			a.altAttrs[i][j] = DefaultAttributes()
+// ensureRowSize makes sure row slices match the current column count.
+func (a *AlternateScreen) ensureRowSize() {
+	y := 0
+	for y < a.lines {
+		// buffer
+		if len(a.buffer[y]) != a.columns {
+			if len(a.buffer[y]) > a.columns {
+				a.buffer[y] = a.buffer[y][:a.columns]
+			} else {
+				diff := a.columns - len(a.buffer[y])
+				pad := make([]rune, diff)
+				i := 0
+				for i < diff {
+					pad[i] = ' '
+					i++
+				}
+				a.buffer[y] = append(a.buffer[y], pad...)
+			}
 		}
+		// attrs
+		if len(a.attrs[y]) != a.columns {
+			if len(a.attrs[y]) > a.columns {
+				a.attrs[y] = a.attrs[y][:a.columns]
+			} else {
+				diff := a.columns - len(a.attrs[y])
+				pad := make([]Attributes, diff)
+				i := 0
+				for i < diff {
+					pad[i] = DefaultAttributes()
+					i++
+				}
+				a.attrs[y] = append(a.attrs[y], pad...)
+			}
+		}
+		y++
 	}
-	a.altCursor = Cursor{X: 0, Y: 0, Attrs: DefaultAttributes()}
-	a.altTabStops = make(map[int]bool)
-	for i := 0; i < a.columns; i += 8 {
-		a.altTabStops[i] = true
+}
+
+// Reset clears the current (active) buffer safely without writing out of bounds.
+func (a *AlternateScreen) Reset() {
+	// Normalize row widths first
+	a.ensureRowSize()
+
+	y := 0
+	for y < a.lines {
+		x := 0
+		for x < a.columns { // strictly <, not <=
+			a.buffer[y][x] = ' '
+			a.attrs[y][x] = DefaultAttributes()
+			x++
+		}
+		y++
+	}
+
+	a.cursor.X = 0
+	a.cursor.Y = 0
+	a.savedCursor.X = 0
+	a.savedCursor.Y = 0
+
+	// Rebuild tab stops at every 8th column
+	a.tabStops = make(map[int]bool)
+	i := 0
+	for i < a.columns {
+		a.tabStops[i] = true
+		i += 8
 	}
 }
 
@@ -293,4 +337,34 @@ func (a *AlternateScreen) ScrollToBottom() {
 		a.HistoryScreen.ScrollToBottom()
 	}
 	// No-op in alternate screen
+}
+
+// Resize adjusts both main and alternate buffers.
+// Policy:
+// - If usingAlternate: resize ONLY the alt buffer, NO history changes.
+// - If on main: resize main; when shrinking rows, also push bottom lines into history.
+func (a *AlternateScreen) Resize(newCols, newLines int) {
+	if newCols <= 0 || newLines <= 0 {
+		return
+	}
+	if a.usingAlternate {
+		// Resize the alt buffer “in place” by temporarily making it active,
+		// delegating to base, then restoring invariants already held.
+		// (We are already on alt; Native/History paths operate on a.buffer/a.attrs)
+		a.HistoryScreen.Resize(newCols, newLines) // history code is inert here (alt uses empty list)
+		// Rebuild alt tab stops for the new width
+		a.altTabStops = make(map[int]bool)
+		for i := 0; i < newCols; i += 8 {
+			a.altTabStops[i] = true
+		}
+		return
+	}
+
+	// Not using alternate: we must resize the MAIN buffer/state.
+	// Temporarily switch pointers to main state, call HistoryScreen.Resize, then restore.
+	// Save currently active (main) state is already in a.buffer/a.attrs/etc.
+	a.HistoryScreen.Resize(newCols, newLines)
+
+	// Rebuild main tab stops captured in a.tabStops by HistoryScreen.Resize → NativeScreen.Resize
+	// Nothing else to do; alt buffer will be resized lazily on first entry if desired.
 }

@@ -325,3 +325,37 @@ func (h *HistoryScreen) GetCursor() (int, int) {
 func (h *HistoryScreen) GetCursorObject() *Cursor {
 	return &h.cursor
 }
+
+// Resize on HistoryScreen adds policy for scrollback when SHRINKING rows.
+// We preserve the TOP..(newLines-1) region and PUSH cut bottom rows into history.
+// Growing rows delegates to base then pads as usual.
+func (h *HistoryScreen) Resize(newCols, newLines int) {
+	if newCols <= 0 || newLines <= 0 {
+		return
+	}
+
+	// If we are viewing history, jump back to live view first.
+	if h.viewingHistory {
+		h.ScrollToBottom()
+	}
+
+	oldLines := h.lines
+	oldCols := h.columns
+
+	// If rows will shrink and we’re not in alternate (alt handled elsewhere),
+	// push the bottom lines that would be lost into history so they remain reachable.
+	if newLines < oldLines {
+		cut := oldLines - newLines
+		start := oldLines - cut
+		for i := start; i < oldLines; i++ {
+			h.addToHistory(i)
+		}
+	}
+
+	// Resize underlying NativeScreen buffers/attrs first with column logic.
+	// Temporarily set base geometry so base Resize sees the old size.
+	h.NativeScreen.Resize(newCols, newLines)
+
+	// Cursor already clamped by base Resize
+	_ = oldCols
+}

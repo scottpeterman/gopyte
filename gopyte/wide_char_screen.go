@@ -284,3 +284,134 @@ func isEmoji(r rune) bool {
 		(r >= 0x1F680 && r <= 0x1F6FF) || // Transport and map
 		(r == 0x2764) || (r == 0x2665) // Hearts
 }
+
+// Resize syncs the width-tracking matrices with the active buffer.
+// It delegates to AlternateScreen/HistoryScreen/NativeScreen first, then fixes cellWidths sets.
+
+func (w *WideCharScreen) Resize(newCols, newLines int) {
+	if newCols <= 0 || newLines <= 0 {
+		return
+	}
+
+	// 1) Let the embedded screens resize buffers/attrs first.
+	w.AlternateScreen.Resize(newCols, newLines)
+
+	// If WideCharScreen keeps its own cols/lines, update them now.
+	// If not, it's harmless to keep these two lines or remove them.
+	w.columns = newCols
+	w.lines = newLines
+
+	// 2) Normalize active rows (buffer/attrs) to EXACTLY newCols width.
+	//    This guarantees we never index past row length in the loops below.
+	y := 0
+	for y < w.lines {
+		// Buffer
+		if len(w.buffer[y]) != newCols {
+			if len(w.buffer[y]) > newCols {
+				w.buffer[y] = w.buffer[y][:newCols]
+			} else {
+				need := newCols - len(w.buffer[y])
+				pad := make([]rune, need)
+				i := 0
+				for i < need {
+					pad[i] = ' '
+					i++
+				}
+				w.buffer[y] = append(w.buffer[y], pad...)
+			}
+		}
+		// Attrs
+		if len(w.attrs[y]) != newCols {
+			if len(w.attrs[y]) > newCols {
+				w.attrs[y] = w.attrs[y][:newCols]
+			} else {
+				need := newCols - len(w.attrs[y])
+				pad := make([]Attributes, need)
+				i := 0
+				for i < need {
+					pad[i] = DefaultAttributes()
+					i++
+				}
+				w.attrs[y] = append(w.attrs[y], pad...)
+			}
+		}
+		y++
+	}
+
+	// 3) Rebuild width grids to match the new geometry.
+	w.cellWidths = rebuildWidthGrid(w.cellWidths, newCols, newLines)
+	w.altCellWidths = rebuildWidthGrid(w.altCellWidths, newCols, newLines)
+	if !w.usingAlternate {
+		w.mainCellWidths = w.cellWidths
+	}
+
+	// 4) Sanitize cells safely (use row length, not newCols, for the bound).
+	y = 0
+	for y < newLines {
+		row := w.buffer[y]
+		ax := w.attrs[y]
+		cw := w.cellWidths[y]
+
+		limit := len(row)
+		if len(cw) < limit {
+			limit = len(cw)
+		}
+
+		x := 0
+		for x < limit {
+			if row[x] == 0 {
+				row[x] = ' '
+				ax[x] = DefaultAttributes()
+				cw[x] = 1
+			}
+			x++
+		}
+
+		w.buffer[y] = row
+		w.attrs[y] = ax
+		w.cellWidths[y] = cw
+		y++
+	}
+}
+
+// rebuildWidthGrid returns a grid with target geometry, preserving existing values where possible.
+func rebuildWidthGrid(grid [][]int, newCols, newLines int) [][]int {
+	if grid == nil {
+		grid = make([][]int, 0)
+	}
+	// Adjust rows
+	if len(grid) > newLines {
+		grid = grid[:newLines]
+	} else if len(grid) < newLines {
+		add := newLines - len(grid)
+		for i := 0; i < add; i++ {
+			row := make([]int, newCols)
+			j := 0
+			for j < newCols {
+				row[j] = 1 // default normal width
+				j++
+			}
+			grid = append(grid, row)
+		}
+	}
+
+	// Adjust columns per row
+	y := 0
+	for y < newLines {
+		row := grid[y]
+		if len(row) > newCols {
+			row = row[:newCols]
+		} else if len(row) < newCols {
+			add := make([]int, newCols-len(row))
+			i := 0
+			for i < len(add) {
+				add[i] = 1
+				i++
+			}
+			row = append(row, add...)
+		}
+		grid[y] = row
+		y++
+	}
+	return grid
+}

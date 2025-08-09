@@ -673,3 +673,96 @@ func (s *NativeScreen) GetDisplay() []string {
 func (s *NativeScreen) GetCursor() (int, int) {
 	return s.cursor.X, s.cursor.Y
 }
+
+// Resize adjusts columns/lines on the base NativeScreen.
+// - Column shrink: hard-truncate each row; grow: right-pad with spaces + default attrs
+// - Row shrink: drop bottom rows; grow: append blank rows
+// - Rebuild tab stops every 8 cols
+// - Clamp cursor
+func (s *NativeScreen) Resize(newCols, newLines int) {
+	if newCols <= 0 || newLines <= 0 {
+		return
+	}
+	if newCols == s.columns && newLines == s.lines {
+		return
+	}
+
+	oldCols := s.columns
+	oldLines := s.lines
+
+	// Columns
+	if newCols != oldCols {
+		row := 0
+		for row < oldLines && row < len(s.buffer) {
+			// shrink
+			if newCols < oldCols {
+				if len(s.buffer[row]) > newCols {
+					s.buffer[row] = s.buffer[row][:newCols]
+					s.attrs[row] = s.attrs[row][:newCols]
+				}
+			} else {
+				// grow
+				add := newCols - len(s.buffer[row])
+				if add > 0 {
+					nb := make([]rune, len(s.buffer[row])+add)
+					copy(nb, s.buffer[row])
+					for i := len(s.buffer[row]); i < len(nb); i++ {
+						nb[i] = ' '
+					}
+					na := make([]Attributes, len(s.attrs[row])+add)
+					copy(na, s.attrs[row])
+					for i := len(s.attrs[row]); i < len(na); i++ {
+						na[i] = DefaultAttributes()
+					}
+					s.buffer[row] = nb
+					s.attrs[row] = na
+				}
+			}
+			row++
+		}
+	}
+
+	// Rows
+	if newLines < oldLines {
+		// shrink: keep top portion, drop bottom lines
+		s.buffer = s.buffer[:newLines]
+		s.attrs = s.attrs[:newLines]
+	} else if newLines > oldLines {
+		// grow: append blank rows
+		add := newLines - oldLines
+		for i := 0; i < add; i++ {
+			rowB := make([]rune, newCols)
+			rowA := make([]Attributes, newCols)
+			for x := 0; x < newCols; x++ {
+				rowB[x] = ' '
+				rowA[x] = DefaultAttributes()
+			}
+			s.buffer = append(s.buffer, rowB)
+			s.attrs = append(s.attrs, rowA)
+		}
+	}
+
+	// Commit new geometry
+	s.columns = newCols
+	s.lines = newLines
+
+	// Clamp cursor
+	if s.cursor.Y >= s.lines {
+		s.cursor.Y = s.lines - 1
+	}
+	if s.cursor.X >= s.columns {
+		s.cursor.X = s.columns - 1
+	}
+	if s.cursor.Y < 0 {
+		s.cursor.Y = 0
+	}
+	if s.cursor.X < 0 {
+		s.cursor.X = 0
+	}
+
+	// Rebuild tab stops
+	s.tabStops = make(map[int]bool)
+	for i := 0; i < s.columns; i += 8 {
+		s.tabStops[i] = true
+	}
+}

@@ -1,0 +1,16 @@
+- folder_name: Default
+  sessions:
+    - DeviceType: Linux
+      Model: Dell Server
+      Vendor: Dell
+      credsid: '1'
+      display_name: localhost
+      host: 127.0.0.1
+      port: '22'
+    - DeviceType: Linux
+      Model: Dell Server
+      Vendor: Dell
+      credsid: '1'
+      display_name: localhost
+      host: 127.0.0.1
+      port: '22'
